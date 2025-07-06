@@ -3,26 +3,31 @@ import joblib
 import pandas as pd
 import os
 import gdown
-import zipfile
 
 app = Flask(__name__)
 
-# Constants
+# Define model directory
 MODEL_DIR = os.path.join(os.path.dirname(__file__), 'models')
-MODEL_ZIP_PATH = os.path.join(os.path.dirname(__file__), 'models.zip')
-GDRIVE_FILE_ID = 'YOUR_GOOGLE_DRIVE_FILE_ID_HERE'  # Replace with your actual file ID
-GDRIVE_URL = f'https://drive.google.com/uc?id={GDRIVE_FILE_ID}'
+os.makedirs(MODEL_DIR, exist_ok=True)
 
-# Ensure models directory exists
-if not os.path.exists(MODEL_DIR):
-    print("Downloading model zip from Google Drive...")
-    gdown.download(GDRIVE_URL, MODEL_ZIP_PATH, quiet=False)
-    print("Extracting model files...")
-    with zipfile.ZipFile(MODEL_ZIP_PATH, 'r') as zip_ref:
-        zip_ref.extractall(MODEL_DIR)
-    os.remove(MODEL_ZIP_PATH)
+# Google Drive File IDs (Replace with real IDs for all files)
+MODEL_FILES = {
+    "knn.joblib": "1ueZ8rG20z0H0p8bqKJz4WjIsn0yHN394",
+    "le_Region.joblib": "<ADD_ID_HERE>",
+    "le_Soil_Type.joblib": "<ADD_ID_HERE>",
+    "le_Crop.joblib": "<ADD_ID_HERE>",
+    "le_Weather_Condition.joblib": "<ADD_ID_HERE>",
+    "minmax_scaler.joblib": "<ADD_ID_HERE>"
+}
 
-# Load the trained model and preprocessing tools
+# Download missing models
+for filename, file_id in MODEL_FILES.items():
+    filepath = os.path.join(MODEL_DIR, filename)
+    if not os.path.exists(filepath):
+        print(f"Downloading {filename} from Google Drive...")
+        gdown.download(f"https://drive.google.com/uc?id={file_id}", filepath, quiet=False)
+
+# Load models
 model = joblib.load(os.path.join(MODEL_DIR, "knn.joblib"))
 le_region = joblib.load(os.path.join(MODEL_DIR, "le_Region.joblib"))
 le_soil = joblib.load(os.path.join(MODEL_DIR, "le_Soil_Type.joblib"))
@@ -30,10 +35,12 @@ le_crop = joblib.load(os.path.join(MODEL_DIR, "le_Crop.joblib"))
 le_weather = joblib.load(os.path.join(MODEL_DIR, "le_Weather_Condition.joblib"))
 scaler = joblib.load(os.path.join(MODEL_DIR, "minmax_scaler.joblib"))
 
+# Landing Page
 @app.route('/')
 def landing():
     return render_template('landing.html')
 
+# Prediction Page
 @app.route('/predict', methods=['GET', 'POST'])
 def predict():
     if request.method == 'POST':
@@ -56,12 +63,15 @@ def predict():
 
     return render_template('index.html', prediction=None)
 
+# Preprocessing logic
 def preprocess_input(data_dict):
     df = pd.DataFrame([data_dict])
+
     df['Region'] = le_region.transform(df['Region'])
     df['Soil_Type'] = le_soil.transform(df['Soil_Type'])
     df['Crop'] = le_crop.transform(df['Crop'])
     df['Weather_Condition'] = le_weather.transform(df['Weather_Condition'])
+
     df['Irrigation_Used'] = 1 if df['Irrigation_Used'].iloc[0] == 'Yes' else 0
     df['Fertilizer_Used'] = 1 if df['Fertilizer_Used'].iloc[0] == 'Yes' else 0
 
@@ -76,5 +86,6 @@ def preprocess_input(data_dict):
                'Temperature_Celsius', 'Fertilizer_Used',
                'Irrigation_Used', 'Weather_Condition']]
 
+# Start the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
