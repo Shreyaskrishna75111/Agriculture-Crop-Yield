@@ -13,11 +13,11 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 # Google Drive File IDs (Replace with real IDs for all files)
 MODEL_FILES = {
     "knn.joblib": "1ueZ8rG20z0H0p8bqKJz4WjIsn0yHN394",
-    "le_Region.joblib": "<ADD_ID_HERE>",
-    "le_Soil_Type.joblib": "<ADD_ID_HERE>",
-    "le_Crop.joblib": "<ADD_ID_HERE>",
-    "le_Weather_Condition.joblib": "<ADD_ID_HERE>",
-    "minmax_scaler.joblib": "<ADD_ID_HERE>"
+    "le_Region.joblib": "1ueZ8rG20z0H0p8bqKJz4WjIsn0yHN394",
+    "le_Soil_Type.joblib": "1ueZ8rG20z0H0p8bqKJz4WjIsn0yHN394",
+    "le_Crop.joblib": "1ueZ8rG20z0H0p8bqKJz4WjIsn0yHN394",
+    "le_Weather_Condition.joblib": "1ueZ8rG20z0H0p8bqKJz4WjIsn0yHN394",
+    "minmax_scaler.joblib": "1ueZ8rG20z0H0p8bqKJz4WjIsn0yHN394"
 }
 
 # Download missing models
